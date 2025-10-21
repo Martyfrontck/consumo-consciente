@@ -11,6 +11,7 @@ export default function LoginCadastro() {
   const router = useRouter();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: '477636096643-0hn5igg71vc10x7dcfslcr27ld6r579b.apps.googleusercontent.com',
     androidClientId: '477636096643-android.apps.googleusercontent.com',
     iosClientId: '477636096643-ios.apps.googleusercontent.com',
     webClientId: '477636096643-web.apps.googleusercontent.com',
