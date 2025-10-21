@@ -1,37 +1,57 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { useState } from 'react';
-import { Button, StyleSheet, Text } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Button, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 GoogleSignin.configure({
-  webClientId: '1039285808884-8e8v0b8m8g4v0g8v.apps.googleusercontent.com',
+  webClientId: '477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com',
 });
 
-interface GoogleUserInfo {
-  name?: string;
-  email?: string;
-  picture?: string;
-  // outros campos que você quiser usar
-}
-
 export default function LoginCadastro() {
-  const [response, setResponse] = useState<GoogleUserInfo | null>(null);
-  const [token, setToken] = useState('');
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const trySilentLogin = async () => {
+      try {
+        const isSignedIn = await GoogleSignin.isSignedIn();
+        if (isSignedIn) {
+          const userInfo = await GoogleSignin.signInSilently();
+          await AsyncStorage.setItem('accessToken', userInfo.idToken || '');
+          await AsyncStorage.setItem('userName', userInfo.user.name || '');
+          router.replace('/home');
+        }
+      } catch (error) {
+        console.log('Login silencioso falhou:', error);
+      }
+    };
+
+    trySilentLogin();
+  }, []);
 
   async function handleAuth() {
     try {
-      const { idToken } = await GoogleSignin.signIn();
-      const res = await fetch(
-        'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + idToken
-      );
-      const data: GoogleUserInfo = await res.json();
-      setResponse(data);
-      setToken(data.name || '');
+      setLoading(true);
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const userInfo = await GoogleSignin.signIn();
+      const { idToken, user } = userInfo;
+
+      if (!idToken || !user?.name) {
+        throw new Error('Informações de login incompletas.');
+      }
+
       await AsyncStorage.setItem('accessToken', idToken);
-      console.log('Usuário autenticado:', data.name);
-    } catch (error) {
+      await AsyncStorage.setItem('userName', user.name);
+
+      console.log('Usuário autenticado com sucesso:', user.name);
+      router.replace('/home');
+    } catch (error: any) {
       console.error('Erro ao autenticar:', error);
+      Alert.alert('Erro ao autenticar', error.message || 'Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -39,7 +59,12 @@ export default function LoginCadastro() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Consumo Consciente</Text>
       <Text style={styles.subtitle}>Acesse ou crie sua conta com o Google</Text>
-      <Button title="Entrar / Cadastrar" onPress={handleAuth} color="#4285F4" />
+      <Button
+        title={loading ? 'Entrando...' : 'Entrar / Cadastrar'}
+        onPress={handleAuth}
+        color="#4285F4"
+        disabled={loading}
+      />
     </SafeAreaView>
   );
 }
@@ -49,7 +74,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F5DC', // bege suave
+    backgroundColor: '#F5F5DC',
     paddingHorizontal: 20,
   },
   title: {

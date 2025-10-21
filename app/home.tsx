@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Button, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home() {
   const router = useRouter();
@@ -29,18 +30,18 @@ export default function Home() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <ActivityIndicator size="large" color="#4285F4" />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Bem-vindo ao Consumo Consciente!</Text>
       <Text style={styles.subtitle}>Você está autenticado com sucesso 🎉</Text>
       <Button title="Sair" onPress={handleLogout} color="#d9534f" />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -49,17 +50,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F5F5DC', // bege suave
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#333',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 30,
-    color: '#555',
+    color: '#666',
+    textAlign: 'center',
   },
 });
