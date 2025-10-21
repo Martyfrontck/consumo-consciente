@@ -1,48 +1,46 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect } from 'react';
-import { Alert, Button, StyleSheet, Text, View } from 'react-native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useState } from 'react';
+import { Button, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-WebBrowser.maybeCompleteAuthSession();
+GoogleSignin.configure({
+  webClientId: '1039285808884-8e8v0b8m8g4v0g8v.apps.googleusercontent.com',
+});
+
+interface GoogleUserInfo {
+  name?: string;
+  email?: string;
+  picture?: string;
+  // outros campos que você quiser usar
+}
 
 export default function LoginCadastro() {
-  const router = useRouter();
+  const [response, setResponse] = useState<GoogleUserInfo | null>(null);
+  const [token, setToken] = useState('');
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '477636096643-0hn5igg71vc10x7dcfslcr27ld6r579b.apps.googleusercontent.com',
-    androidClientId: '477636096643-android.apps.googleusercontent.com',
-    iosClientId: '477636096643-ios.apps.googleusercontent.com',
-    webClientId: '477636096643-web.apps.googleusercontent.com',
-  });
-
-  useEffect(() => {
-    const handleAuth = async () => {
-      if (response?.type === 'success' && response.authentication?.accessToken) {
-        const token = response.authentication.accessToken;
-        await AsyncStorage.setItem('accessToken', token);
-        console.log('Token salvo:', token);
-        router.replace('/home');
-      } else if (response?.type === 'error') {
-        Alert.alert('Erro ao autenticar', 'Não foi possível fazer login com o Google.');
-      }
-    };
-
-    handleAuth();
-  }, [response]);
+  async function handleAuth() {
+    try {
+      const { idToken } = await GoogleSignin.signIn();
+      const res = await fetch(
+        'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + idToken
+      );
+      const data: GoogleUserInfo = await res.json();
+      setResponse(data);
+      setToken(data.name || '');
+      await AsyncStorage.setItem('accessToken', idToken);
+      console.log('Usuário autenticado:', data.name);
+    } catch (error) {
+      console.error('Erro ao autenticar:', error);
+    }
+  }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Consumo Consciente</Text>
       <Text style={styles.subtitle}>Acesse ou crie sua conta com o Google</Text>
-      <Button
-        title="Continuar com Google"
-        disabled={!request}
-        onPress={() => promptAsync()}
-        color="#4285F4"
-      />
-    </View>
+      <Button title="Entrar / Cadastrar" onPress={handleAuth} color="#4285F4" />
+    </SafeAreaView>
   );
 }
 
@@ -51,18 +49,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F5DC', // bege suave
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#333',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 30,
-    color: '#555',
+    color: '#666',
     textAlign: 'center',
   },
 });
