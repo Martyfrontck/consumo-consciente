@@ -11,9 +11,10 @@ export default function LoginCadastro() {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com',
+      webClientId: '477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com', // ✅ Web Client ID
       offlineAccess: true,
       forceCodeForRefreshToken: true,
+      scopes: ['profile', 'email'], // ✅ escopos recomendados
     });
 
     const trySilentLogin = async () => {
@@ -21,6 +22,7 @@ export default function LoginCadastro() {
         const isSignedIn = await GoogleSignin.isSignedIn();
         if (isSignedIn) {
           const userInfo = await GoogleSignin.signInSilently();
+          console.log('Login silencioso:', userInfo); // 🔍 log para depuração
           await AsyncStorage.setItem('accessToken', userInfo.idToken || '');
           await AsyncStorage.setItem('userName', userInfo.user?.name || '');
           router.replace('/home');
@@ -38,6 +40,8 @@ export default function LoginCadastro() {
       setLoading(true);
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const userInfo = await GoogleSignin.signIn();
+      console.log('Login ativo:', userInfo); // 🔍 log para depuração
+
       const { idToken, user } = userInfo;
 
       if (!idToken || !user?.name) {
@@ -59,9 +63,10 @@ export default function LoginCadastro() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Consumo Consciente</Text>
-      <Text style={styles.subtitle}>Acesse ou crie sua conta com o Google</Text>
+      <Text style={styles.subtitle}>Use sua conta Google para começar sua jornada consciente</Text>
       <Button
         title={loading ? 'Entrando...' : 'Entrar / Cadastrar'}
+        accessibilityLabel="Botão para autenticar com Google"
         onPress={handleAuth}
         color="#4285F4"
         disabled={loading}
