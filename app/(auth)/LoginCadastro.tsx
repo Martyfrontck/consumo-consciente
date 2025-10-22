@@ -1,26 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-GoogleSignin.configure({
-  webClientId: '477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com',
-});
 
 export default function LoginCadastro() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com',
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+
     const trySilentLogin = async () => {
       try {
         const isSignedIn = await GoogleSignin.isSignedIn();
         if (isSignedIn) {
           const userInfo = await GoogleSignin.signInSilently();
           await AsyncStorage.setItem('accessToken', userInfo.idToken || '');
-          await AsyncStorage.setItem('userName', userInfo.user.name || '');
+          await AsyncStorage.setItem('userName', userInfo.user?.name || '');
           router.replace('/home');
         }
       } catch (error) {
@@ -29,7 +31,7 @@ export default function LoginCadastro() {
     };
 
     trySilentLogin();
-  }, []);
+  }, [router]);
 
   async function handleAuth() {
     try {
@@ -45,11 +47,10 @@ export default function LoginCadastro() {
       await AsyncStorage.setItem('accessToken', idToken);
       await AsyncStorage.setItem('userName', user.name);
 
-      console.log('Usuário autenticado com sucesso:', user.name);
       router.replace('/home');
     } catch (error: any) {
       console.error('Erro ao autenticar:', error);
-      Alert.alert('Erro ao autenticar', error.message || 'Tente novamente.');
+      Alert.alert('Erro ao autenticar', error?.message || 'Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -70,23 +71,7 @@ export default function LoginCadastro() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F5DC',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 30,
-    color: '#666',
-    textAlign: 'center',
-  },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5DC', paddingHorizontal: 20 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 10, color: '#333' },
+  subtitle: { fontSize: 16, marginBottom: 30, color: '#666', textAlign: 'center' },
 });

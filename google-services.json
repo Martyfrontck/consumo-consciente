@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "477636096643",
+    "project_id": "consumo-consciente-475817",
+    "storage_bucket": "consumo-consciente-475817.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477636096643:android:f1430802d9084f6952e1b6",
+        "android_client_info": {
+          "package_name": "com.martyfrontck.consumoconsciente"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYdTAqJupPCLZGfNw6xCx7HQYvNkOX3rc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
