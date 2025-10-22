@@ -18,6 +18,7 @@ export default function Home() {
           router.replace('/(auth)/LoginCadastro');
           return;
         }
+
         const name = await AsyncStorage.getItem('userName');
         setUserName(name);
       } catch (err) {
@@ -34,16 +35,13 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      try {
-        const isSignedIn = await GoogleSignin.isSignedIn();
-        if (isSignedIn) {
-          await GoogleSignin.signOut();
-        }
-      } catch (gErr) {
-        console.warn('Erro ao deslogar do Google:', gErr);
+
+      const isSignedIn = await GoogleSignin.isSignedIn();
+      if (isSignedIn) {
+        await GoogleSignin.signOut();
       }
-      await AsyncStorage.removeItem('accessToken');
-      await AsyncStorage.removeItem('userName');
+
+      await AsyncStorage.multiRemove(['accessToken', 'userName']);
       router.replace('/');
     } catch (err) {
       console.error('Erro ao realizar logout:', err);
@@ -66,7 +64,7 @@ export default function Home() {
       <Text style={styles.subtitle}>
         {userName ? `Você está autenticado como ${userName}` : 'Você está autenticado'}
       </Text>
-      <View style={{ width: '60%' }}>
+      <View style={styles.buttonContainer}>
         <Button title="Sair" onPress={handleLogout} color="#d9534f" />
       </View>
     </SafeAreaView>
@@ -74,7 +72,27 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5DC', paddingHorizontal: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: '#333', textAlign: 'center' },
-  subtitle: { fontSize: 16, marginBottom: 30, color: '#666', textAlign: 'center' },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5DC',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 30,
+    color: '#666',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    width: '60%',
+  },
 });

@@ -9,11 +9,16 @@ export default function Index() {
 
   useEffect(() => {
     const checkLogged = async () => {
-      const token = await AsyncStorage.getItem('accessToken');
-      if (token) {
-        router.replace('/home');
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (token) {
+          router.replace('/home');
+        }
+      } catch (err) {
+        console.error('Erro ao verificar login:', err);
       }
     };
+
     checkLogged();
   }, [router]);
 
@@ -30,6 +35,17 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5DC', paddingHorizontal: 20 },
-  title: { fontSize: 24, marginBottom: 20, color: '#333', textAlign: 'center' },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5DC',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    color: '#333',
+    textAlign: 'center',
+  },
 });

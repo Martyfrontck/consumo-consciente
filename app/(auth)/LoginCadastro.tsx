@@ -11,24 +11,24 @@ export default function LoginCadastro() {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '477636096643-0hn5igg7lcv10c7fdsclcr27tl6d759b.apps.googleusercontent.com', // ✅ Web Client ID
+      webClientId: '477636096643-1s11lon117gdrep71m62d9e6211jljg2.apps.googleusercontent.com',
       offlineAccess: true,
-      forceCodeForRefreshToken: true,
-      scopes: ['profile', 'email'], // ✅ escopos recomendados
+      scopes: ['profile', 'email'],
     });
 
     const trySilentLogin = async () => {
       try {
-        const isSignedIn = await GoogleSignin.isSignedIn();
-        if (isSignedIn) {
-          const userInfo = await GoogleSignin.signInSilently();
-          console.log('Login silencioso:', userInfo); // 🔍 log para depuração
-          await AsyncStorage.setItem('accessToken', userInfo.idToken || '');
-          await AsyncStorage.setItem('userName', userInfo.user?.name || '');
-          router.replace('/home');
+        const userInfo = await GoogleSignin.signInSilently();
+        console.log('Login silencioso:', userInfo);
+
+        await AsyncStorage.setItem('accessToken', userInfo.idToken || '');
+        await AsyncStorage.setItem('userName', userInfo.user?.name || '');
+        router.replace('/home');
+      } catch (error: any) {
+        console.log('Login silencioso falhou:', error?.message || error);
+        if (error?.message?.includes('SIGN_IN_REQUIRED')) {
+          console.log('Usuário precisa fazer login manual.');
         }
-      } catch (error) {
-        console.log('Login silencioso falhou:', error);
       }
     };
 
@@ -38,9 +38,14 @@ export default function LoginCadastro() {
   async function handleAuth() {
     try {
       setLoading(true);
+
+      // 🔄 Limpa sessões antigas e tokens
+      await GoogleSignin.revokeAccess();
+      await GoogleSignin.signOut();
+
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const userInfo = await GoogleSignin.signIn();
-      console.log('Login ativo:', userInfo); // 🔍 log para depuração
+      console.log('Login ativo:', userInfo);
 
       const { idToken, user } = userInfo;
 
@@ -76,7 +81,23 @@ export default function LoginCadastro() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5DC', paddingHorizontal: 20 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 10, color: '#333' },
-  subtitle: { fontSize: 16, marginBottom: 30, color: '#666', textAlign: 'center' },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5DC',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 30,
+    color: '#666',
+    textAlign: 'center',
+  },
 });
